@@ -1,0 +1,11 @@
+converged	score	run	cpu_time	memory	nclusters_pred	all_vmeasure	clone_prev_MAE	clone_prev_MSE	slsbulk_clone_prev_MSE	slsbulk_vmeasure	slsbulk_clone_prev_MAE	uncertainty
+1	285088.698521867	/crex/proj/uppstore2017165/nobackup/alva/scWGBS/Lnuclei_out_hg38/cluster/0_0.95_10000/epi_basic/101/cluster_posteriors.tsv.gz	2	149	1	NA	NA	NA	NA	NA	NA	NA
+1	217407.700151033	/crex/proj/uppstore2017165/nobackup/alva/scWGBS/Lnuclei_out_hg38/cluster/0_0.95_10000/epi_basic/439/cluster_posteriors.tsv.gz	9	146	2	NA	NA	NA	NA	NA	NA	NA
+1	209931.528247799	/crex/proj/uppstore2017165/nobackup/alva/scWGBS/Lnuclei_out_hg38/cluster/0_0.95_10000/epi_basic/12/cluster_posteriors.tsv.gz	21	150	3	NA	NA	NA	NA	NA	NA	NA
+1	201848.992488733	/crex/proj/uppstore2017165/nobackup/alva/scWGBS/Lnuclei_out_hg38/cluster/0_0.95_10000/epi_basic/13/cluster_posteriors.tsv.gz	17	151	4	NA	NA	NA	NA	NA	NA	NA
+1	201925.191540074	/crex/proj/uppstore2017165/nobackup/alva/scWGBS/Lnuclei_out_hg38/cluster/0_0.95_10000/epi_basic/14/cluster_posteriors.tsv.gz	17	150	5	NA	NA	NA	NA	NA	NA	NA
+1	202461.70146827	/crex/proj/uppstore2017165/nobackup/alva/scWGBS/Lnuclei_out_hg38/cluster/0_0.95_10000/epi_basic/25/cluster_posteriors.tsv.gz	21	151	6	NA	NA	NA	NA	NA	NA	NA
+1	202462.698759714	/crex/proj/uppstore2017165/nobackup/alva/scWGBS/Lnuclei_out_hg38/cluster/0_0.95_10000/epi_basic/26/cluster_posteriors.tsv.gz	22	149	7	NA	NA	NA	NA	NA	NA	NA
+1	201580.202356378	/crex/proj/uppstore2017165/nobackup/alva/scWGBS/Lnuclei_out_hg38/cluster/0_0.95_10000/epi_basic/17/cluster_posteriors.tsv.gz	21	148	8	NA	NA	NA	NA	NA	NA	NA
+1	202040.555560776	/crex/proj/uppstore2017165/nobackup/alva/scWGBS/Lnuclei_out_hg38/cluster/0_0.95_10000/epi_basic/8/cluster_posteriors.tsv.gz	25	151	9	NA	NA	NA	NA	NA	NA	NA
+1	202122.104086696	/crex/proj/uppstore2017165/nobackup/alva/scWGBS/Lnuclei_out_hg38/cluster/0_0.95_10000/epi_basic/9/cluster_posteriors.tsv.gz	21	149	10	NA	NA	NA	NA	NA	NA	NA

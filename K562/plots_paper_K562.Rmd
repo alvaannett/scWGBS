@@ -1,0 +1,150 @@
+---
+title: "Plots Paper K562"
+output: html_notebook
+---
+
+```{r}
+library(umap)
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+library(tibble)
+library(rlist)
+library(patchwork)
+library(pheatmap)
+```
+
+```{r}
+data_K562 = read.csv("final_mean_meth_region_K562_farlink.tsv", sep = "\t")
+cluster_K562 = read.csv("cluster_posteriors_farlink.tsv", sep = "\t")
+```
+
+```{r}
+colnames(cluster_K562)[2] = 1
+cluster_K562$cluster = colnames(cluster_K562[2])[apply(cluster_K562[2],1,which.max)]
+cluster_K562$col_cluster = c("orange")
+
+data_K562[is.na(data_K562)] = 0
+data_K562 = as.data.frame(t(data_K562))
+rownames(data_K562) = gsub("[.]", "-", rownames(data_K562))
+data_K562 = data_K562[rownames(data_K562) %in% cluster_K562$cell_id,]
+```
+
+```{r}
+umap_K562 = umap(data_K562)
+head(umap_K562$layout)
+```
+
+```{r}
+plot_K562 = data.frame(x = umap_K562$layout[,1], y = umap_K562$layout[,2], cell_id = rownames(umap_K562$layout))
+
+plot_K562 = merge(plot_K562, cluster_K562[c("cell_id", "cluster")], by = "cell_id")
+plot_K562$pool = unlist(strsplit(plot_K562$cell_id, split = '-') %>% list.map(.[2]))
+plot_K562[plot_K562$pool == "1" | plot_K562$pool == "2" | plot_K562$pool == "3" | plot_K562$pool == "4",]$pool = "farlink"
+
+pool3435 = plot_K562 %>% 
+           filter(pool == "pool34" | pool == "pool35")
+plot_K562$batch = "1"
+plot_K562[plot_K562$pool %in% c("pool70", "pool71", "pool72", "pool73", "pool74", "pool75"),]$batch = "2"
+plot_K562[plot_K562$pool %in% c("pool34", "pool35"),]$batch = "snmC-seq2"
+plot_K562[plot_K562$pool %in% c("farlink"),]$batch = "farlink"
+
+```
+
+```{r}
+A = ggplot(plot_K562, aes()) + 
+  geom_point(aes(x=x, y=y, color=cluster), size = 2.5, show.legend = F) +
+  scale_colour_manual(values = c("orange")) +
+  xlab("umap 1") +
+  ylab("umap 2") +
+  theme_bw() +
+  ggtitle("") +
+   theme(axis.title = element_text(size = 15), 
+         axis.text = element_text(size = 15))
+
+```
+
+```{r}
+B = ggplot(plot_K562, aes()) + 
+  geom_point(aes(x=x, y=y, color=pool), size = 2.5, show.legend = F) +
+  xlab("umap 1") +
+  ylab("umap 2") +
+  ggtitle("") +
+  theme_bw() + 
+  theme(axis.title = element_text(size = 15), 
+         axis.text = element_text(size = 15))
+```
+
+```{r}
+C = ggplot(plot_K562, aes()) + 
+  geom_point(aes(x=x, y=y, color=cluster), size = 1.5, color = "grey") +
+  xlab("umap 1") +
+  ylab("umap 2") +
+  theme_bw() +
+  geom_point(data = pool3435, aes(x=x, y=y), size = 2.5, color = "red", shape = 15, show.legend = F) + 
+  theme(axis.title = element_text(size = 15), 
+         axis.text = element_text(size = 15))
+```
+
+```{r}
+D = ggplot(plot_K562, aes()) + 
+  geom_point(aes(x=x, y=y, color=batch), size = 2.5, alpha = 0.7) +
+  scale_color_manual(values = c( "royalblue3", "green4", "red3", "orange")) +
+  xlab("umap 1") +
+  ylab("umap 2") +
+  theme_bw() +
+  theme(axis.title = element_text(size = 15), 
+         axis.text = element_text(size = 15))
+
+D
+```
+
+```{r}
+matrix = as.matrix(data_K562[cluster_K562[order(cluster_K562$cluster),]$cell_id,])
+
+row_an = as.data.frame(cluster_K562[order(cluster_K562$cluster),]$cluster)
+rownames(row_an) = cluster_K562[order(cluster_K562$cluster),]$cell_id
+colnames(row_an) = "cluster"
+
+row_color = list(cluster = c("1" = "orange"), batch = c("1" = "royalblue3", "2" = "green4", "snmC-seq2" = "orange", "farlink" = "red3"))
+
+
+anno = plot_K562[,c("cluster", "batch")]
+rownames(anno) = plot_K562$cell_id
+```
+
+
+```{r}
+E = as.ggplot(pheatmap(matrix, 
+         cluster_rows = F, 
+         show_rownames = F, 
+         show_colnames = F, 
+         annotation_legend = F,
+         annotation_names_row = F,
+         treeheight_col = 25,
+         gaps_row = 0,
+         annotation_row = row_an, 
+         annotation_colors = row_color))
+
+pheatmap(matrix, 
+         cluster_rows = F, 
+         show_rownames = F, 
+         show_colnames = F, 
+         annotation_names_row = F,
+         treeheight_col = 25,
+         gaps_row = 0,
+         annotation_row = anno)
+
+```
+
+```{r}
+plot = (A + E) / (B + D) 
+plot
+```
+
+```{r}
+ggsave(plot = plot, filename = "K562_plot.pdf", width = 20, height = 20, units = "cm")
+ggsave(plot = plot, filename = "K562_plot.jpeg", width = 20, height = 20, units = "cm")
+```
+
+

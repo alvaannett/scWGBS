@@ -1,0 +1,2 @@
+ntotal	nconv	best_score	best_cluster	cpu_total	memory	nclusters_pred
+500	500	507941.207911263	/crex/proj/uppstore2017165/nobackup/alva/scWGBS/K562_out_hg38/cluster/0_0.95_10000/epi_region/0/cluster_posteriors.tsv.gz	196115	303	1

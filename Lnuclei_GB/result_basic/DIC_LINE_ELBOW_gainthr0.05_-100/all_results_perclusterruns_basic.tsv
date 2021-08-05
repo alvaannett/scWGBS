@@ -1,0 +1,11 @@
+converged	score	run	cpu_time	memory	nclusters_pred	all_vmeasure	clone_prev_MAE	clone_prev_MSE	slsbulk_clone_prev_MSE	slsbulk_vmeasure	slsbulk_clone_prev_MAE	uncertainty
+1	229175.587783901	/crex/proj/uppstore2017165/nobackup/alva/scWGBS/Lnuclei_out_gene_bodies_hg38/cluster/0_0.95_10000/epi_basic/100/cluster_posteriors.tsv.gz	6	154	1	NA	NA	NA	NA	NA	NA	NA
+1	187539.773335814	/crex/proj/uppstore2017165/nobackup/alva/scWGBS/Lnuclei_out_gene_bodies_hg38/cluster/0_0.95_10000/epi_basic/176/cluster_posteriors.tsv.gz	8	157	2	NA	NA	NA	NA	NA	NA	NA
+1	184476.642056377	/crex/proj/uppstore2017165/nobackup/alva/scWGBS/Lnuclei_out_gene_bodies_hg38/cluster/0_0.95_10000/epi_basic/117/cluster_posteriors.tsv.gz	11	155	3	NA	NA	NA	NA	NA	NA	NA
+1	183876.390145318	/crex/proj/uppstore2017165/nobackup/alva/scWGBS/Lnuclei_out_gene_bodies_hg38/cluster/0_0.95_10000/epi_basic/128/cluster_posteriors.tsv.gz	17	155	4	NA	NA	NA	NA	NA	NA	NA
+1	182484.379302431	/crex/proj/uppstore2017165/nobackup/alva/scWGBS/Lnuclei_out_gene_bodies_hg38/cluster/0_0.95_10000/epi_basic/14/cluster_posteriors.tsv.gz	34	144	5	NA	NA	NA	NA	NA	NA	NA
+1	184701.066088238	/crex/proj/uppstore2017165/nobackup/alva/scWGBS/Lnuclei_out_gene_bodies_hg38/cluster/0_0.95_10000/epi_basic/15/cluster_posteriors.tsv.gz	39	161	6	NA	NA	NA	NA	NA	NA	NA
+1	184759.897686194	/crex/proj/uppstore2017165/nobackup/alva/scWGBS/Lnuclei_out_gene_bodies_hg38/cluster/0_0.95_10000/epi_basic/16/cluster_posteriors.tsv.gz	39	159	7	NA	NA	NA	NA	NA	NA	NA
+1	183402.455950962	/crex/proj/uppstore2017165/nobackup/alva/scWGBS/Lnuclei_out_gene_bodies_hg38/cluster/0_0.95_10000/epi_basic/27/cluster_posteriors.tsv.gz	34	161	8	NA	NA	NA	NA	NA	NA	NA
+1	181535.132326721	/crex/proj/uppstore2017165/nobackup/alva/scWGBS/Lnuclei_out_gene_bodies_hg38/cluster/0_0.95_10000/epi_basic/28/cluster_posteriors.tsv.gz	34	144	9	NA	NA	NA	NA	NA	NA	NA
+1	181639.175101936	/crex/proj/uppstore2017165/nobackup/alva/scWGBS/Lnuclei_out_gene_bodies_hg38/cluster/0_0.95_10000/epi_basic/29/cluster_posteriors.tsv.gz	34	146	10	NA	NA	NA	NA	NA	NA	NA

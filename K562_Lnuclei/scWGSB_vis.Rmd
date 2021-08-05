@@ -1,0 +1,123 @@
+---
+title: "scWGBS - K562 and Lnuclei"
+output: html_notebook
+---
+
+```{r}
+library(Rtsne)
+library(tidyr)
+library(dplyr)
+library(ggplot2)
+library(rlist)
+library(pheatmap)
+```
+
+- 576 cells in original data 
+- 380 cells passed filtering with EpiclomalRegion  
+- 101 non-redundant regions used for clustering by Epiclomal 
+- Almost perfect seperation of celltypes 
+- Lnuclei split into two clusters
+- Epiclomal Basic and Region result in same clusters  
+
+
+## DATA 
+
+```{r}
+data = read.csv("to_keep_meth_K562_Lnuclei.tsv", sep = "\t")
+cluster_basic = read.csv("cluster_posteriors_bestrun_basic.tsv", sep = "\t")
+cluster_region = read.csv("cluster_posteriors_bestrun_region.tsv", sep = "\t")
+```
+
+```{r}
+colnames(cluster_basic)[2:4] = 1:3
+cluster_basic$cluster = colnames(cluster_basic[2:4])[apply(cluster_basic[2:4],1,which.max)]
+
+cluster_basic$col_cluster = ""
+cluster_basic[cluster_basic$cluster == "1",]$col_cluster = "orange"
+cluster_basic[cluster_basic$cluster == "2",]$col_cluster = "green4"
+cluster_basic[cluster_basic$cluster == "3",]$col_cluster = "royalblue3"
+
+cluster_basic$cell_type = unlist(strsplit(cluster_basic$cell_id, split = "-") %>% list.map(.[1]))
+
+cluster_basic$col_cell = ""
+cluster_basic[cluster_basic$cell_type == "K562",]$col_cell = "red"
+cluster_basic[cluster_basic$cell_type == "Lnuclei",]$col_cell = "yellow"
+```
+
+```{r}
+colnames(cluster_region)[2:4] = 1:3
+cluster_region$cluster = colnames(cluster_region[2:4])[apply(cluster_region[2:4],1,which.max)]
+
+cluster_region$col_cluster = ""
+cluster_region[cluster_region$cluster == "1",]$col_cluster = "orange"
+cluster_region[cluster_region$cluster == "2",]$col_cluster = "green4"
+cluster_region[cluster_region$cluster == "3",]$col_cluster = "royalblue3"
+
+cluster_region$cell_type = unlist(strsplit(cluster_region$cell_id, split = "-") %>% list.map(.[1]))
+
+cluster_region$col_cell = ""
+cluster_region[cluster_region$cell_type == "K562",]$col_cell = "red"
+cluster_region[cluster_region$cell_type == "Lnuclei",]$col_cell = "yellow"
+```
+
+```{r}
+data[is.na(data)] = 0
+rownames(data) = gsub("[.]", "-", rownames(data))
+data = data[rownames(data) %in% cluster$cell_id,]
+```
+
+## t-SNE 
+
+```{r}
+tsne_results <- Rtsne(data, perplexity=30, check_duplicates = FALSE)
+```
+
+## PLOT EpiclomalBasic 
+
+```{r}
+tsne_plot = data.frame(x = tsne_results$Y[,1], y = tsne_results$Y[,2], cell_id = rownames(data))
+tsne_plot = merge(tsne_plot, cluster_basic[c("cell_id", "cluster", "cell_type")], by = "cell_id")
+```
+
+```{r}
+ggplot(tsne_plot, aes()) + 
+  geom_point(aes(x=x, y=y, color=cluster, shape = cell_type), size = 2.5) +
+  scale_colour_manual(values = c("orange", "green4", "royalblue3")) +
+  xlab("dim 1") +
+  ylab("dim 2") +
+  theme_bw()
+```
+
+
+```{r}
+matrix = as.matrix(data[cluster_basic[order(cluster_basic$cluster),]$cell_id,])
+heatmap(matrix, Rowv = NA, RowSideColors = cluster_basic[order(cluster_basic$cluster),]$col_cluster, xlab = "regions", ylab = "cells", labRow = NA, labCol = NA)
+legend(x="right", legend = c("1", "2", "3"), fill = c("orange", "green4", "royalblue3")) 
+
+heatmap(matrix, Rowv = NA, RowSideColors = cluster_basic[order(cluster_basic$cluster),]$col_cell, xlab = "regions", ylab = "cells", labRow = NA, labCol = NA)
+legend(x="right", legend = c("K562", "Lnuclei"), fill = c("red", "yellow"))
+```
+
+## PLOT EpiclomalRegion 
+
+```{r}
+tsne_plot_region = data.frame(x = tsne_results$Y[,1], y = tsne_results$Y[,2], cell_id = rownames(data))
+tsne_plot_region = merge(tsne_plot_region, cluster_region[c("cell_id", "cluster", "cell_type")], by = "cell_id")
+```
+
+```{r}
+ggplot(tsne_plot_region, aes()) + 
+  geom_point(aes(x=x, y=y, color=cluster, shape = cell_type), size = 2.5) +
+  scale_colour_manual(values = c("orange", "green4", "royalblue3")) +
+  xlab("dim 1") +
+  ylab("dim 2") +
+  theme_bw()
+```
+```{r}
+matrix = as.matrix(data[cluster_region[order(cluster_region$cluster),]$cell_id,])
+heatmap(matrix, Rowv = NA, RowSideColors = cluster_region[order(cluster_region$cluster),]$col_cluster, xlab = "regions", ylab = "cells", labRow = NA, labCol = NA)
+legend(x="right", legend = c("1", "2", "3"), fill = c("orange", "green4", "royalblue3")) 
+
+heatmap(matrix, Rowv = NA, RowSideColors = cluster_region[order(cluster_region$cluster),]$col_cell, xlab = "regions", ylab = "cells", labRow = NA, labCol = NA)
+legend(x="right", legend = c("K562", "Lnuclei"), fill = c("red", "yellow"))
+```
