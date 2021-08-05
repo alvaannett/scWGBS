@@ -12,11 +12,16 @@ library(tibble)
 library(rlist)
 library(patchwork)
 library(pheatmap)
+library(ggplotify)
 ```
 
 ```{r}
 data_K562 = read.csv("final_mean_meth_region_K562_farlink.tsv", sep = "\t")
 cluster_K562 = read.csv("cluster_posteriors_farlink.tsv", sep = "\t")
+```
+
+```{r}
+cbPalette <- c("orange", "royalblue3", "red3", "green4", "gold1")
 ```
 
 ```{r}
@@ -42,19 +47,17 @@ plot_K562 = merge(plot_K562, cluster_K562[c("cell_id", "cluster")], by = "cell_i
 plot_K562$pool = unlist(strsplit(plot_K562$cell_id, split = '-') %>% list.map(.[2]))
 plot_K562[plot_K562$pool == "1" | plot_K562$pool == "2" | plot_K562$pool == "3" | plot_K562$pool == "4",]$pool = "farlink"
 
-pool3435 = plot_K562 %>% 
-           filter(pool == "pool34" | pool == "pool35")
+
 plot_K562$batch = "1"
 plot_K562[plot_K562$pool %in% c("pool70", "pool71", "pool72", "pool73", "pool74", "pool75"),]$batch = "2"
 plot_K562[plot_K562$pool %in% c("pool34", "pool35"),]$batch = "snmC-seq2"
 plot_K562[plot_K562$pool %in% c("farlink"),]$batch = "farlink"
-
 ```
 
 ```{r}
 A = ggplot(plot_K562, aes()) + 
   geom_point(aes(x=x, y=y, color=cluster), size = 2.5, show.legend = F) +
-  scale_colour_manual(values = c("orange")) +
+  scale_colour_manual(values = cbPalette[1]) +
   xlab("umap 1") +
   ylab("umap 2") +
   theme_bw() +
@@ -76,46 +79,36 @@ B = ggplot(plot_K562, aes()) +
 ```
 
 ```{r}
-C = ggplot(plot_K562, aes()) + 
-  geom_point(aes(x=x, y=y, color=cluster), size = 1.5, color = "grey") +
-  xlab("umap 1") +
-  ylab("umap 2") +
-  theme_bw() +
-  geom_point(data = pool3435, aes(x=x, y=y), size = 2.5, color = "red", shape = 15, show.legend = F) + 
-  theme(axis.title = element_text(size = 15), 
-         axis.text = element_text(size = 15))
-```
-
-```{r}
 D = ggplot(plot_K562, aes()) + 
   geom_point(aes(x=x, y=y, color=batch), size = 2.5, alpha = 0.7) +
-  scale_color_manual(values = c( "royalblue3", "green4", "red3", "orange")) +
+  scale_color_manual(values = c(cbPalette[2:5])) +
   xlab("umap 1") +
   ylab("umap 2") +
   theme_bw() +
   theme(axis.title = element_text(size = 15), 
          axis.text = element_text(size = 15))
-
-D
 ```
 
 ```{r}
-matrix = as.matrix(data_K562[cluster_K562[order(cluster_K562$cluster),]$cell_id,])
+matrix = read.csv("final_mean_meth_region_K562_farlink.tsv", sep = "\t")
+matrix = as.data.frame(t(matrix))
+rownames(matrix) = gsub("[.]", "-", rownames(matrix))
+matrix = matrix[rownames(matrix) %in% cluster_K562$cell_id,]
+matrix = as.matrix(matrix[cluster_K562[order(cluster_K562$cluster),]$cell_id,])
 
 row_an = as.data.frame(cluster_K562[order(cluster_K562$cluster),]$cluster)
 rownames(row_an) = cluster_K562[order(cluster_K562$cluster),]$cell_id
 colnames(row_an) = "cluster"
 
-row_color = list(cluster = c("1" = "orange"), batch = c("1" = "royalblue3", "2" = "green4", "snmC-seq2" = "orange", "farlink" = "red3"))
+row_color = list(cluster = c("1" = cbPalette[1]), batch = c("1" = cbPalette[2], "2" = cbPalette[3], "snmC-seq2" = cbPalette[4], "farlink" = cbPalette[5]))
 
 
 anno = plot_K562[,c("cluster", "batch")]
 rownames(anno) = plot_K562$cell_id
 ```
 
-
 ```{r}
-E = as.ggplot(pheatmap(matrix, 
+E.1 = as.ggplot(pheatmap(matrix, 
          cluster_rows = F, 
          show_rownames = F, 
          show_colnames = F, 
@@ -126,25 +119,189 @@ E = as.ggplot(pheatmap(matrix,
          annotation_row = row_an, 
          annotation_colors = row_color))
 
-pheatmap(matrix, 
+E.2 = as.ggplot(pheatmap(matrix, 
          cluster_rows = F, 
          show_rownames = F, 
          show_colnames = F, 
          annotation_names_row = F,
+         annotation_legend = F,
          treeheight_col = 25,
          gaps_row = 0,
-         annotation_row = anno)
+         annotation_row = anno,
+         annotation_colors = row_color))
 
 ```
 
 ```{r}
-plot = (A + E) / (B + D) 
-plot
+plot.1 = (A + E.1) / (B + D) 
+plot.1
 ```
 
 ```{r}
-ggsave(plot = plot, filename = "K562_plot.pdf", width = 20, height = 20, units = "cm")
-ggsave(plot = plot, filename = "K562_plot.jpeg", width = 20, height = 20, units = "cm")
+plot.2 = (A + E.2) / (B + D) 
+plot.2
 ```
 
+
+```{r}
+ggsave(plot = plot.1, filename = "K562_CpG_plot.pdf", width = 20, height = 20, units = "cm")
+ggsave(plot = plot.2, filename = "K562_CpG_batch_plot.pdf", width = 20, height = 20, units = "cm")
+```
+
+# BATCH GB 
+
+```{r}
+data_GB = read.csv("final_mean_meth_region_K562_GB.tsv", sep = "\t")
+```
+
+```{r}
+data_GB[is.na(data_GB)] = 0
+data_GB = as.data.frame(t(data_GB))
+rownames(data_GB) = gsub("[.]", "-", rownames(data_GB))
+data_GB = data_GB[rownames(data_GB) %in% cluster_K562$cell_id,]
+```
+
+```{r}
+umap_GB = umap(data_GB)
+```
+
+```{r}
+plot_GB = data.frame(x = umap_GB$layout[,1], y = umap_GB$layout[,2], cell_id = rownames(umap_GB$layout))
+
+plot_GB = merge(plot_GB, cluster_K562[c("cell_id", "cluster")], by = "cell_id")
+plot_GB$pool = unlist(strsplit(plot_GB$cell_id, split = '-') %>% list.map(.[2]))
+plot_GB[plot_K562$pool == "1" | plot_GB$pool == "2" | plot_GB$pool == "3" | plot_GB$pool == "4",]$pool = "farlink"
+
+
+plot_GB$batch = "1"
+plot_GB[plot_GB$pool %in% c("pool70", "pool71", "pool72", "pool73", "pool74", "pool75"),]$batch = "2"
+plot_GB[plot_GB$pool %in% c("pool34", "pool35"),]$batch = "snmC-seq2"
+plot_GB[plot_GB$pool %in% c("farlink"),]$batch = "farlink"
+```
+
+```{r}
+GB = ggplot(plot_GB, aes()) + 
+  geom_point(aes(x=x, y=y, color=batch), size = 2.5, alpha = 0.7) +
+  scale_color_manual(values = c(cbPalette[2:5])) +
+  xlab("umap 1") +
+  ylab("umap 2") +
+  theme_bw() +
+  ggtitle("GB") +
+  theme(axis.title = element_text(size = 15), 
+         axis.text = element_text(size = 15))
+```
+
+```{r}
+matrix = read.csv("final_mean_meth_region_K562_GB.tsv", sep = "\t")
+matrix = as.data.frame(t(matrix))
+rownames(matrix) = gsub("[.]", "-", rownames(matrix))
+matrix = matrix[rownames(matrix) %in% cluster_K562$cell_id,]
+matrix = as.matrix(matrix[cluster_K562[order(cluster_K562$cluster),]$cell_id,])
+
+row_an = as.data.frame(cluster_K562[order(cluster_K562$cluster),]$cluster)
+rownames(row_an) = cluster_K562[order(cluster_K562$cluster),]$cell_id
+colnames(row_an) = "cluster"
+
+row_color = list(cluster = c("1" = cbPalette[1]), batch = c("1" = cbPalette[2], "2" = cbPalette[3], "snmC-seq2" = cbPalette[4], "farlink" = cbPalette[5]))
+
+anno = plot_GB[,c("cluster", "batch")]
+rownames(anno) = plot_GB$cell_id
+```
+
+```{r}
+as.ggplot(pheatmap(matrix, 
+         cluster_rows = F, 
+         show_rownames = F, 
+         show_colnames = F, 
+         annotation_names_row = F,
+         annotation_legend = F,
+         treeheight_col = 25,
+         gaps_row = 0,
+         annotation_row = anno,
+         annotation_colors = row_color))
+```
+
+# BATCH TSS 
+
+```{r}
+data_TSS = read.csv("final_mean_meth_region_K562_TSS.tsv", sep = "\t")
+```
+
+
+```{r}
+data_TSS[is.na(data_TSS)] = 0
+data_TSS = as.data.frame(t(data_TSS))
+rownames(data_TSS) = gsub("[.]", "-", rownames(data_TSS))
+data_TSS = data_TSS[rownames(data_TSS) %in% cluster_K562$cell_id,]
+```
+
+```{r}
+umap_TSS = umap(data_TSS)
+```
+
+```{r}
+plot_TSS = data.frame(x = umap_TSS$layout[,1], y = umap_TSS$layout[,2], cell_id = rownames(umap_TSS$layout))
+
+plot_TSS = merge(plot_TSS, cluster_K562[c("cell_id", "cluster")], by = "cell_id")
+plot_TSS$pool = unlist(strsplit(plot_TSS$cell_id, split = '-') %>% list.map(.[2]))
+plot_TSS[plot_TSS$pool == "1" | plot_TSS$pool == "2" | plot_TSS$pool == "3" | plot_TSS$pool == "4",]$pool = "farlink"
+
+
+plot_TSS$batch = "1"
+plot_TSS[plot_TSS$pool %in% c("pool70", "pool71", "pool72", "pool73", "pool74", "pool75"),]$batch = "2"
+plot_TSS[plot_TSS$pool %in% c("pool34", "pool35"),]$batch = "snmC-seq2"
+plot_TSS[plot_TSS$pool %in% c("farlink"),]$batch = "farlink"
+```
+
+```{r}
+TSS = ggplot(plot_TSS, aes()) + 
+  geom_point(aes(x=x, y=y, color=batch), size = 2.5, alpha = 0.7, show.legend = F) +
+  scale_color_manual(values = c(cbPalette[2:5])) +
+  xlab("umap 1") +
+  ylab("umap 2") +
+  theme_bw() +
+  ggtitle("TSS") + 
+  theme(axis.title = element_text(size = 15), 
+         axis.text = element_text(size = 15))
+```
+
+```{r}
+matrix = read.csv("final_mean_meth_region_K562_TSS.tsv", sep = "\t")
+matrix = as.data.frame(t(matrix))
+rownames(matrix) = gsub("[.]", "-", rownames(matrix))
+matrix = matrix[rownames(matrix) %in% cluster_K562$cell_id,]
+matrix = as.matrix(matrix[cluster_K562[order(cluster_K562$cluster),]$cell_id,])
+
+row_an = as.data.frame(cluster_K562[order(cluster_K562$cluster),]$cluster)
+rownames(row_an) = cluster_K562[order(cluster_K562$cluster),]$cell_id
+colnames(row_an) = "cluster"
+
+row_color = list(cluster = c("1" = cbPalette[1]), batch = c("1" = cbPalette[2], "2" = cbPalette[3], "snmC-seq2" = cbPalette[4], "farlink" = cbPalette[5]))
+
+anno = plot_TSS[,c("cluster", "batch")]
+rownames(anno) = plot_TSS$cell_id
+```
+
+```{r}
+as.ggplot(pheatmap(matrix, 
+         cluster_rows = F, 
+         show_rownames = F, 
+         show_colnames = F, 
+         annotation_names_row = F,
+         annotation_legend = F,
+         treeheight_col = 25,
+         gaps_row = 0,
+         annotation_row = anno,
+         annotation_colors = row_color))
+```
+
+
+```{r}
+plot = TSS + GB 
+plot 
+```
+
+```{r}
+ggsave(plot = plot, filename = "K562_GB_TSS_batch_plot.pdf", width = 30, height = 20, units = "cm")
+```
 
